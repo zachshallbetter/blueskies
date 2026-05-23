@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blue Skies</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #a6c8e0;
+    cursor: default;
+  }
+
+  .parallax-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .parallax-layer {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    height: 100%;
+    will-change: transform;
+    pointer-events: none;
+    image-rendering: auto;
+  }
+
+  .parallax-layer img {
+    display: block;
+    height: 100%;
+    width: auto;
+    min-width: 100%;
+  }
+
+  /* Sky layer - fills and covers, completely static */
+  .layer-sky {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: none !important;
+  }
+  .layer-sky img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+  /* Toggle button — glass style */
+  .parallax-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 100;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.45);
+    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 100%);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow:
+      0 4px 24px rgba(0,0,0,0.12),
+      inset 0 1px 1px rgba(255,255,255,0.5),
+      inset 0 -1px 2px rgba(0,0,0,0.06);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+    outline: none;
+  }
+  .parallax-toggle:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 100%);
+    border-color: rgba(255,255,255,0.7);
+    box-shadow:
+      0 6px 32px rgba(0,0,0,0.15),
+      inset 0 1px 1px rgba(255,255,255,0.6),
+      inset 0 -1px 2px rgba(0,0,0,0.08);
+    transform: scale(1.06);
+  }
+  .parallax-toggle:active {
+    transform: scale(0.96);
+  }
+  .parallax-toggle svg {
+    width: 22px;
+    height: 22px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    transition: opacity 0.3s;
+  }
+  /* Light mode (mouse off — default) */
+  .parallax-toggle.light {
+    border-color: rgba(255,255,255,0.5);
+    background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%);
+  }
+  .parallax-toggle.light svg {
+    fill: #ffffff;
+    opacity: 0.6;
+  }
+  /* Dark mode (mouse on) */
+  .parallax-toggle.dark {
+    border-color: rgba(27,46,74,0.5);
+    background: linear-gradient(135deg, rgba(27,46,74,0.55) 0%, rgba(27,46,74,0.3) 100%);
+  }
+  .parallax-toggle.dark svg {
+    fill: #ffffff;
+    opacity: 1;
+  }
+  .parallax-toggle.dark:hover {
+    background: linear-gradient(135deg, rgba(27,46,74,0.65) 0%, rgba(27,46,74,0.4) 100%);
+    border-color: rgba(27,46,74,0.7);
+  }
+</style>
+</head>
+<body>
+
+<div class="parallax-container" id="scene">
+  <!-- Layer 0: Sky (backmost - least movement) -->
+  <div class="parallax-layer layer-sky" data-depth-x="0" data-depth-y="0">
+    <img src="uploads/backround-1.png" alt="">
+  </div>
+
+  <!-- Layer 1: Distant snow mountain -->
+  <div class="parallax-layer" data-range="0.15" data-depth-y="0">
+    <img src="uploads/backround-2.png" alt="">
+  </div>
+
+  <!-- Layer 2: Mid mountain range -->
+  <div class="parallax-layer" data-range="0.5" data-depth-y="0">
+    <img src="uploads/backround-3.png" alt="">
+  </div>
+
+  <!-- Layer 3: Foreground silhouette (frontmost - most movement) -->
+  <div class="parallax-layer" data-range="1.0" data-depth-y="0">
+    <img src="uploads/backround-4.png" alt="">
+  </div>
+</div>
+
+<button class="parallax-toggle light" id="parallaxToggle" title="Toggle mouse parallax">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#FFFFFF">
+    <path d="M20.7 110.5c-16.3-50.7 32.7-89.6 77-76.3 134.2 40.4 240.4 67.2 361.6 124.7 19.3 9.4 31.5 27.7 33.1 47.7 4.6 73.4-134.2 92-181.8 108.6L261.9 431.7c-20.6 47.3-90.8 54.7-116 4.2-29.6-67-56.8-137.9-82.6-206-14.3-40.4-28.9-79.3-42.6-119.4zM83.5 96.7c9.3 26.4 119.3 309.8 119.3 309.8s43-101.7 47.6-113.7c7.4-19.5 23.9-34.5 44.5-39.7 41.9-10.5 88.3-23.3 124.8-42.1-112.2-51.3-210.3-76.3-336.2-114.2z"></path>
+
+  </svg>
+</button>
+
+<script>
+(function() {
+  const layers = document.querySelectorAll('.parallax-layer');
+  const container = document.getElementById('scene');
+
+  // Current and target positions for smooth interpolation
+  let targetX = 0;
+  let currentX = 0;
+
+  const ease = 0.04; // Lower = smoother/slower follow
+
+  // --- Auto-drift animation ---
+  // Start from far right, drift fully to the left
+  let autoX = 1; // Start offset: far right
+  let autoDriftDirection = -1; // -1 = leftward, 1 = rightward
+  const autoDriftSpeed = 0.0015; // Drift speed — full traverse in ~11 seconds at 60fps
+  let userHasMoved = false;
+  let autoActive = true;
+  let mouseMoveCount = 0;
+  const MOUSE_THRESHOLD = 15; // Ignore first N mousemove events (cursor already in frame)
+
+  let mouseParallaxEnabled = false; // Mouse off by default
+
+  // Toggle button
+  const toggleBtn = document.getElementById('parallaxToggle');
+  toggleBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    mouseParallaxEnabled = !mouseParallaxEnabled;
+
+    if (mouseParallaxEnabled) {
+      // Switch to dark (mouse on)
+      toggleBtn.classList.remove('light');
+      toggleBtn.classList.add('dark');
+      document.body.style.cursor = 'crosshair';
+      autoActive = false;
+      userHasMoved = false;
+      mouseMoveCount = 0;
+    } else {
+      // Switch to light (mouse off), restart auto-drift
+      toggleBtn.classList.remove('dark');
+      toggleBtn.classList.add('light');
+      document.body.style.cursor = 'default';
+      autoX = currentX;
+      autoActive = true;
+    }
+  });
+
+  // Normalize cursor to -1…1 from center (horizontal only)
+  function onMouseMove(e) {
+    if (!mouseParallaxEnabled) return;
+    targetX = (e.clientX / window.innerWidth  - 0.5) * 2;
+  }
+
+  // Also support device orientation for mobile
+  function onDeviceOrientation(e) {
+    if (e.gamma !== null) {
+      targetX = Math.max(-1, Math.min(1, e.gamma / 30));
+      if (!userHasMoved) {
+        userHasMoved = true;
+        autoActive = false;
+      }
+    }
+  }
+
+  function animate() {
+    // Auto-drift: pan back and forth, full range
+    if (autoActive) {
+      autoX += autoDriftDirection * autoDriftSpeed;
+      if (autoX <= -1) { autoX = -1; autoDriftDirection = 1; }
+      if (autoX >= 1) { autoX = 1; autoDriftDirection = -1; }
+      targetX = autoX;
+    }
+
+    // Lerp toward target
+    currentX += (targetX - currentX) * ease;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    layers.forEach(layer => {
+      if (layer.classList.contains('layer-sky')) return; // Sky: static
+
+      const img = layer.querySelector('img');
+      const imgWidth = img.naturalWidth;
+      const imgHeight = img.naturalHeight;
+      const scale = vh / imgHeight;
+      const renderedWidth = imgWidth * scale;
+
+      // Max possible shift = how much wider the image is than the viewport, per side
+      const maxShift = (renderedWidth - vw) / 2;
+      // Range factor: 1.0 = full edge-to-edge, less = proportionally less travel
+      const rangeFactor = parseFloat(layer.dataset.range) || 0;
+      const moveX = currentX * maxShift * rangeFactor;
+
+      layer.style.width = renderedWidth + 'px';
+      layer.style.height = vh + 'px';
+      layer.style.transform = `translate(calc(-50% - ${moveX}px), 0)`;
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  // Wait for images to load so naturalWidth/Height are available
+  const images = document.querySelectorAll('.parallax-layer img');
+  let loaded = 0;
+
+  function onImageReady() {
+    loaded++;
+    if (loaded >= images.length) {
+      // Set initial sizes — start from far right
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      layers.forEach(layer => {
+        if (!layer.classList.contains('layer-sky')) {
+          const img = layer.querySelector('img');
+          const scale = vh / img.naturalHeight;
+          const renderedWidth = img.naturalWidth * scale;
+          const maxShift = (renderedWidth - vw) / 2;
+          const rangeFactor = parseFloat(layer.dataset.range) || 0;
+          const initMoveX = autoX * maxShift * rangeFactor;
+          layer.style.width = renderedWidth + 'px';
+          layer.style.height = vh + 'px';
+          layer.style.transform = `translate(calc(-50% - ${initMoveX}px), 0)`;
+        }
+      });
+      currentX = autoX;
+      animate();
+    }
+  }
+
+  images.forEach(img => {
+    if (img.complete) {
+      onImageReady();
+    } else {
+      img.addEventListener('load', onImageReady);
+    }
+  });
+
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('deviceorientation', onDeviceOrientation);
+
+  // Recalc on resize
+  window.addEventListener('resize', () => {
+    const vh = window.innerHeight;
+    layers.forEach(layer => {
+      if (!layer.classList.contains('layer-sky')) {
+        const img = layer.querySelector('img');
+        if (img.naturalHeight > 0) {
+          const scale = vh / img.naturalHeight;
+          const renderedWidth = img.naturalWidth * scale;
+          layer.style.width = renderedWidth + 'px';
+          layer.style.height = vh + 'px';
+        }
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
