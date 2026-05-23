@@ -53,6 +53,20 @@
     transform: scale(1);
   }
 
+  /* Offset transition delays from foreground (Layer 3 / nth-child(4)) backwards to sky (Layer 0 / nth-child(1)) */
+  .parallax-layer:nth-child(4) img {
+    transition-delay: 0s;
+  }
+  .parallax-layer:nth-child(3) img {
+    transition-delay: 0.15s;
+  }
+  .parallax-layer:nth-child(2) img {
+    transition-delay: 0.3s;
+  }
+  .parallax-layer:nth-child(1) img {
+    transition-delay: 0.45s;
+  }
+
   /* Sky layer - fills and covers, completely static */
   .layer-sky {
     left: 0;
