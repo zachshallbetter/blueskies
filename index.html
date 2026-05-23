@@ -129,12 +129,12 @@
   </div>
 
   <!-- Layer 1: Distant snow mountain -->
-  <div class="parallax-layer" data-range="0.15" data-depth-y="0">
+  <div class="parallax-layer" data-range="0.12" data-depth-y="0">
     <img src="uploads/backround-2.png" alt="">
   </div>
 
   <!-- Layer 2: Mid mountain range -->
-  <div class="parallax-layer" data-range="0.5" data-depth-y="0">
+  <div class="parallax-layer" data-range="0.35" data-depth-y="0">
     <img src="uploads/backround-3.png" alt="">
   </div>
 
@@ -166,7 +166,15 @@
   // Start from far right, drift fully to the left
   let autoX = 1; // Start offset: far right
   let autoDriftDirection = -1; // -1 = leftward, 1 = rightward
-  const autoDriftSpeed = 0.0015; // Drift speed — full traverse in ~11 seconds at 60fps
+  const BASE_DRIFT_RATE = 0.09; // Units per second at 1920px width
+  const REFERENCE_WIDTH = 1920;
+
+  function getDriftRate() {
+    // Scale drift so visual speed feels consistent across screen sizes
+    // Narrower screens have more overflow per unit, so slow the rate down
+    return BASE_DRIFT_RATE * (window.innerWidth / REFERENCE_WIDTH);
+  }
+  let lastFrameTime = 0;
   let userHasMoved = false;
   let autoActive = true;
   let mouseMoveCount = 0;
@@ -215,17 +223,26 @@
     }
   }
 
-  function animate() {
+  function animate(timestamp) {
+    // Delta time in seconds for frame-rate-independent animation
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05); // Cap at 50ms to avoid jumps
+    lastFrameTime = timestamp;
+
     // Auto-drift: pan back and forth, full range
     if (autoActive) {
-      autoX += autoDriftDirection * autoDriftSpeed;
+      autoX += autoDriftDirection * getDriftRate() * dt;
       if (autoX <= -1) { autoX = -1; autoDriftDirection = 1; }
       if (autoX >= 1) { autoX = 1; autoDriftDirection = -1; }
       targetX = autoX;
     }
 
-    // Lerp toward target
-    currentX += (targetX - currentX) * ease;
+    // Lerp toward target (only when mouse-driven; auto-drift sets directly)
+    if (autoActive) {
+      currentX = targetX;
+    } else {
+      currentX += (targetX - currentX) * ease;
+    }
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -277,7 +294,7 @@
         }
       });
       currentX = autoX;
-      animate();
+      requestAnimationFrame(animate);
     }
   }
 
