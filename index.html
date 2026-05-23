@@ -160,13 +160,16 @@
   let targetX = 0;
   let currentX = 0;
 
-  const ease = 0.04; // Lower = smoother/slower follow
+  // Detect Chrome browser
+  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+
+  const ease = isChrome ? 0.02 : 0.04; // Lower = smoother/slower follow (reduced for Chrome)
 
   // --- Auto-drift animation ---
   // Start from far right, drift fully to the left
   let autoX = 1; // Start offset: far right
   let autoDriftDirection = -1; // -1 = leftward, 1 = rightward
-  const BASE_DRIFT_RATE = 0.09; // Units per second at 1920px width
+  const BASE_DRIFT_RATE = isChrome ? 0.045 : 0.09; // Units per second at 1920px width (reduced for Chrome)
   const REFERENCE_WIDTH = 1920;
 
   function getDriftRate() {
