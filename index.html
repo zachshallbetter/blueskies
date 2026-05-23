@@ -209,6 +209,7 @@
   let lastFrameTime = 0;
   let userHasMoved = false;
   let autoActive = true;
+  let driftSpeedMultiplier = 0; // Starts at 0 to ease in the drift speed
   let mouseMoveCount = 0;
   const MOUSE_THRESHOLD = 15; // Ignore first N mousemove events (cursor already in frame)
 
@@ -234,6 +235,7 @@
       toggleBtn.classList.add('light');
       document.body.style.cursor = 'default';
       autoX = currentX;
+      driftSpeedMultiplier = 0; // Reset to ease in the drift speed again
       autoActive = true;
     }
   });
@@ -280,9 +282,15 @@
     const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05); // Cap at 50ms to avoid jumps
     lastFrameTime = timestamp;
 
+    // Gently ramp up drift speed from 0 to 1 as the scene fades/unblurs in
+    if (autoActive && driftSpeedMultiplier < 1) {
+      driftSpeedMultiplier += dt / 2.5; // Reach full speed in 2.5 seconds
+      if (driftSpeedMultiplier > 1) driftSpeedMultiplier = 1;
+    }
+
     // Auto-drift: pan back and forth, full range
     if (autoActive) {
-      autoX += autoDriftDirection * getDriftRate() * dt;
+      autoX += autoDriftDirection * getDriftRate() * driftSpeedMultiplier * dt;
       if (autoX <= -1) { autoX = -1; autoDriftDirection = 1; }
       if (autoX >= 1) { autoX = 1; autoDriftDirection = -1; }
       targetX = autoX;
@@ -345,7 +353,12 @@
         }
       });
       currentX = autoX;
-      container.classList.add('scene-loaded');
+      // Ensure layout settles before transitioning to avoid skipping the transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          container.classList.add('scene-loaded');
+        });
+      });
       requestAnimationFrame(animate);
     }
   }
