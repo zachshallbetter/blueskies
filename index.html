@@ -53,18 +53,18 @@
     transform: scale(1);
   }
 
-  /* Offset transition delays from foreground (Layer 3 / nth-child(4)) backwards to sky (Layer 0 / nth-child(1)) */
+  /* Offset transition delays for blur/transform from foreground backwards to sky, but don't stagger opacity */
   .parallax-layer:nth-child(4) img {
-    transition-delay: 0s;
+    transition-delay: 0s, 0s, 0s;
   }
   .parallax-layer:nth-child(3) img {
-    transition-delay: 0.15s;
+    transition-delay: 0s, 0.15s, 0.15s;
   }
   .parallax-layer:nth-child(2) img {
-    transition-delay: 0.3s;
+    transition-delay: 0s, 0.3s, 0.3s;
   }
   .parallax-layer:nth-child(1) img {
-    transition-delay: 0.45s;
+    transition-delay: 0s, 0.45s, 0.45s;
   }
 
   /* Sky layer - fills and covers, completely static */
