@@ -38,6 +38,19 @@
     height: 100%;
     width: auto;
     min-width: 100%;
+    opacity: 0;
+    filter: blur(25px);
+    transform: scale(1.04);
+    transition: opacity 1.6s cubic-bezier(0.25, 1, 0.3, 1), 
+                filter 1.6s cubic-bezier(0.25, 1, 0.3, 1), 
+                transform 1.6s cubic-bezier(0.25, 1, 0.3, 1);
+    will-change: opacity, filter, transform;
+  }
+
+  .scene-loaded .parallax-layer img {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
   }
 
   /* Sky layer - fills and covers, completely static */
@@ -332,6 +345,7 @@
         }
       });
       currentX = autoX;
+      container.classList.add('scene-loaded');
       requestAnimationFrame(animate);
     }
   }
