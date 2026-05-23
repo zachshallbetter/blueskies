@@ -166,9 +166,60 @@
       transform: translateX(-50%) scale(0.96);
     }
   }
+
+  /* Loading Overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #a6c8e0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+    will-change: opacity, visibility;
+  }
+
+  .loading-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3.5px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .loading-text {
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading skies...</div>
+</div>
 
 <div class="parallax-container" id="scene">
   <!-- Layer 0: Sky (backmost - least movement) -->
@@ -348,19 +399,29 @@
     requestAnimationFrame(animate);
   }
 
-  // Wait for images to load so naturalWidth/Height are available
-  const images = document.querySelectorAll('.parallax-layer img');
-  let loaded = 0;
+  // Wait for all images to download and load fully
+  const images = Array.from(document.querySelectorAll('.parallax-layer img'));
+  
+  const loadPromises = images.map(img => {
+    return new Promise(resolve => {
+      // If image is already loaded and has dimensions, resolve immediately
+      if (img.complete && img.naturalWidth > 0) {
+        resolve();
+      } else {
+        img.addEventListener('load', () => resolve());
+        img.addEventListener('error', () => resolve()); // Don't block loading if an image fails
+      }
+    });
+  });
 
-  function onImageReady() {
-    loaded++;
-    if (loaded >= images.length) {
-      // Set initial sizes — start from far right
-      const vh = window.innerHeight;
-      const vw = window.innerWidth;
-      layers.forEach(layer => {
-        if (!layer.classList.contains('layer-sky')) {
-          const img = layer.querySelector('img');
+  Promise.all(loadPromises).then(() => {
+    // Set initial sizes — start from far right
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    layers.forEach(layer => {
+      if (!layer.classList.contains('layer-sky')) {
+        const img = layer.querySelector('img');
+        if (img.naturalHeight > 0) {
           const scale = vh / img.naturalHeight;
           const renderedWidth = img.naturalWidth * scale;
           const maxShift = (renderedWidth - vw) / 2;
@@ -370,24 +431,23 @@
           layer.style.height = vh + 'px';
           layer.style.transform = `translate(calc(-50% - ${initMoveX}px), 0)`;
         }
-      });
-      currentX = autoX;
-      // Ensure layout settles before transitioning to avoid skipping the transition
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          container.classList.add('scene-loaded');
-        });
-      });
-      requestAnimationFrame(animate);
+      }
+    });
+    currentX = autoX;
+    
+    // Hide the loading overlay
+    const loader = document.getElementById('loadingOverlay');
+    if (loader) {
+      loader.classList.add('fade-out');
     }
-  }
 
-  images.forEach(img => {
-    if (img.complete) {
-      onImageReady();
-    } else {
-      img.addEventListener('load', onImageReady);
-    }
+    // Ensure layout settles before transitioning to avoid skipping the transition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        container.classList.add('scene-loaded');
+      });
+    });
+    requestAnimationFrame(animate);
   });
 
   window.addEventListener('mousemove', onMouseMove);
